@@ -1,0 +1,23 @@
+@model OnlineMarket.Models.LoginViewModel
+
+<div class="container">
+<form asp-action="Login" method="post" class="mt-5">
+    <h2>Tizimga kirish</h2>
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="Email">Email</label>
+        <input asp-for="Email" type="email" class="form-control"  placeholder="Email...">
+        <span asp-validation-for="Email" class="text-danger"class="form-control"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Password" for="exampleInputPassword1">Parol</label>
+        <input asp-for="Password" type="password" class="form-control" >
+        <span asp-validation-for="Password" class="text-danger"class="form-control"></span>
+    </div>
+    <div class="d-flex justify-content-between">
+        <button type="submit" class="btn btn-primary mt-2">Kirish</button> <a asp-action="Register">Hisob ochish</a>
+    </div>
+    </form>
+</div>
+
+@await Html.PartialAsync("_ValidationScriptsPartial")

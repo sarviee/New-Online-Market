@@ -1,0 +1,24 @@
+@model OnlineMarket.Models.Product
+@using System.Security.Claims
+
+<div class="card" style="width: 18rem;">
+  <img class="card-img-top" src="@Url.Content("~/uploads/" + Model.ImagePath)" alt="Card image cap">
+  <div class="card-body">
+    <h5 class="card-title">@Model.Name</h5>
+    <div class="card-text"><span class="bold">Narxi: </span>$@Model.Price.ToString("N2")</div>
+    <div class="card-text mb-2"><span class="bold">Soni: </span>@Model.Stock</div>
+
+    <div class="d-flex gap-1">
+        <a href="/Product/Details/@Model.Id" class="btn btn-primary">Ko'rish</a>
+        @if(User.Identity.IsAuthenticated)
+        {
+          if(User.FindFirstValue(ClaimTypes.NameIdentifier)==Model.SellerId||User.IsInRole("Admin"))
+          {
+            <a href="/Product/Edit/@Model.Id" class="btn btn-warning">Tahrirlash</a>
+            <a href="/Product/Delete/@Model.Id" class="btn btn-danger">O'chirish</a>
+          }
+        }
+    </div>
+  </div>
+</div>
+

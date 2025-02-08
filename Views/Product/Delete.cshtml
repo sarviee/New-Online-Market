@@ -1,0 +1,7 @@
+@model ProductViewModel
+
+<form asp-action="Delete" enctype="multipart/form-data">
+    <h2>@Model.Name ni rostan ham o'chirmoqchimisiz?</h2>
+    <button class="btn btn-danger mt-3" type="submit">O'chirish</button>
+    <a asp-action="Index" class="btn btn-warning mt-3">Bekor qilish</a>
+</form>

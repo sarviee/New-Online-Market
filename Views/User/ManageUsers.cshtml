@@ -1,0 +1,48 @@
+@model List<UserRoleViewModel>
+
+<h2>Foydalanuvchilar</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>F.I.Sh</th>
+            <th>Email</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            int rowNumber = 1; // Initialize row number
+        }
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@rowNumber</td>
+                <td>@user.FirstName @user.LastName</td>
+                <td>@user.Email</td>
+                <td>@user.UserName</td>
+                <td>
+                    @foreach (var role in user.Roles)
+                    {
+                        <span class="badge bg-success">@role</span>
+                    }
+                </td>
+                <td>
+                    <form class="d-flex gap-3" asp-action="ChangeRole" method="post">
+                        <input type="hidden" name="userId" value="@user.UserId" />
+                        <select name="role">
+                            <option value="Client">Client</option>
+                            <option value="Seller">Seller</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">Change Role</button>
+                    </form>
+                </td>
+            </tr>
+
+            rowNumber++;
+        }
+    </tbody>
+</table>

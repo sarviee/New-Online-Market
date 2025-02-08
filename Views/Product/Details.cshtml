@@ -1,0 +1,22 @@
+@model OnlineMarket.Models.Product
+
+<div class="card">
+  <div class="card-body">
+    <h2 class="card-title">@Model.Name</h2>
+    <div class="d-flex" style="width: 20rem;">
+        <img class="card-img-top" src="@Url.Content("~/uploads/" + Model.ImagePath)" alt="Card image cap">
+    </div>
+    <div class="card-text"><span class="bold">Narxi: </span>$@Model.Price.ToString("N2")</div>
+    <div class="card-text mb-2"><span class="bold">Soni: </span>@Model.Stock</div>
+    <div class="card-text mb-2"><span class="bold">Tavsifi: </span>@Model.Description</div>
+
+    @if(User.IsInRole("Seller")||User.IsInRole("Admin"))
+    {
+      <div class="d-flex gap-1">
+          <a href="/Product/Edit/@Model.Id" class="btn btn-warning">Tahrirlash</a>
+          <a href="/Product/Delete/@Model.Id" class="btn btn-danger">O'chirish</a>
+      </div>
+    }
+  </div>
+</div>
+

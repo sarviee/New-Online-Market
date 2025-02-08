@@ -1,0 +1,136 @@
+﻿
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="mb-3 ml-0">Barcha maxsulotlar</h2>
+        @if(User.Identity.IsAuthenticated && (User.IsInRole("Seller")||User.IsInRole("Admin")))
+        {
+            <a asp-controller="Product" class="btn btn-success" asp-action="Create">Maxsulot qo'shish</a>
+        }
+    </div>
+    @if(TempData["Message"]!=null)
+    {
+        <div class="alert alert-success">@TempData["Message"]</div>
+    }
+    <div class="row gap-md-0 gap-3">
+        <ul class="list-group col-md-3 col-sm-12 col-lg-3" id="categories"></ul>
+        <div class="col-md-9 col-sm-12 col-lg-9">
+            <input onchange="onsearch()" class="form-control mb-2 w-full" type="text" id="search" placeholder="Qidiruv...">
+
+            <div class="d-flex gap-3 flex-wrap" id="products">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var productContainer = document.getElementById("products");
+        var categoryContainer = document.getElementById("categories");
+        var urlParams = new URLSearchParams(window.location.search);
+        var category = urlParams.get("category") ?? '';
+
+        var searchTimeOut = null;
+
+        fetchProducts();
+        fetchCategories();
+
+        document.getElementById("search").addEventListener("input", function(){
+            if(searchTimeOut)
+                clearTimeout(searchTimeOut);
+            
+            searchTimeOut=setTimeout(
+                fetchProducts, 1000
+            )
+        });
+    });
+
+    function selectCategory(categoryId) {
+        const btn = document.getElementById(`cat-btn-${categoryId}`);
+
+        // Remove active class from all buttons
+        document.querySelectorAll("#categories .list-group-item").forEach(btn => btn.classList.remove("active"));
+        
+        // Add active class to clicked button
+        btn.classList.add("active");
+
+        // Update URL query string
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set("category", categoryId==='all'?'':categoryId);
+        window.history.pushState({}, "", newUrl);
+
+        fetchProducts();
+    }
+
+    function fetchProducts() {
+        var host = window.location.hostname;
+        var port = window.location.port; 
+        var protocol = window.location.protocol; 
+        var server_api_url = `${protocol}//${host}:${port}`;
+        var productContainer = document.getElementById("products");
+        var urlParams = new URLSearchParams(window.location.search);
+        var category = urlParams.get("category") ?? '';
+        var search = document.getElementById('search').value??"";
+
+
+        productContainer.innerHTML = `Yuklanmoqda...`;
+
+        fetch(`${server_api_url}/api/products/GetAll?category=${category}&search=${search}`)
+            .then(response => response.json())
+            .then(products => {
+                productContainer.innerHTML = ""; 
+
+                if(products.data.length===0)
+                    productContainer.innerHTML = "<h3>Maxsulotlar mavjud emas</h3>"; 
+                    products.data.forEach(product => {
+                        const row = `<div class="card" style="width: 18rem;">
+                            <img class="card-img-top" src="/uploads/${product.imagePath}" alt="Card image cap">
+                            <div class="card-body">
+                                <h5 class="card-title">${product.name}</h5>
+                                <div class="card-text"><span class="bold">Narxi: </span>$${product.price}</div>
+                                <div class="card-text mb-2"><span class="bold">Soni: </span>${product.stock}</div>
+
+                                <div class="d-flex gap-1">
+                                    <a href="/Product/Details/${product.id}" class="btn btn-primary">Ko'rish</a>
+                                    <a href="/Product/Edit/${product.id}" class="${(products.isAdmin||product.sellerId===products.userId) ? 'btn btn-warning':'d-none'}">Tahrirlash</a>
+                                    <a href="/Product/Delete/${product.id}" class="${(products.isAdmin||product.sellerId===products.userId) ? 'btn btn-danger':'d-none'}">O'chirish</a>
+                                </div>
+                            </div>
+                        </div>`;
+                        productContainer.innerHTML += row;
+                    });
+            })
+            .catch(error => productContainer.innerHTML = `<div class='alert alert-danger'>Xatolik sodir bo'ldi</div>`);
+    }
+
+    function fetchCategories() {
+        var host = window.location.hostname;
+        var port = window.location.port; 
+        var protocol = window.location.protocol; 
+        var server_api_url = `${protocol}//${host}:${port}`;
+        var categoryContainer = document.getElementById("categories");
+
+        categoryContainer.innerHTML = `Yuklanmoqda...`;
+
+        fetch(`${server_api_url}/api/products/GetAllCategories`)
+            .then(response => response.json())
+            .then(categories => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const category = urlParams.get("category") ?? '';
+
+                categoryContainer.innerHTML = `<button onclick="selectCategory('all')" id="cat-btn-all" class='list-group-item ${!category ? 'active' : ''}'>Barchasi</button>`; 
+
+                categories.forEach(c => {
+                    const row = `<button onclick="selectCategory(${c.id})" id="cat-btn-${c.id}" class="list-group-item ${category == c.id ? 'active' : ''}">${c.name}</button>`;
+                    categoryContainer.innerHTML += row;
+                });
+            })
+            .catch(error => categoryContainer.innerHTML = `<div class='alert alert-danger'>Xatolik sodir bo'ldi</div>`);
+    }
+
+
+</script>
